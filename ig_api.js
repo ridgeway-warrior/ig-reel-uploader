@@ -1,4 +1,4 @@
-function uploadReel(videoUrl, caption="", audioName=""){
+async function uploadReel(videoUrl, caption="", audioName=""){
     
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
@@ -19,11 +19,11 @@ function uploadReel(videoUrl, caption="", audioName=""){
         redirect: "follow"
     };
     
-    return fetch(`https://graph.instagram.com/v25.0/${process.env.IG_USER_ID}/media`, requestOptions)
-    .then((response) => response.json())
+    const response = await fetch(`https://graph.instagram.com/v25.0/${process.env.IG_USER_ID}/media`).json()
+    return await response.json()
 }
 
-function publishReel(reelId){
+async function publishReel(reelId){
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     myHeaders.append("Authorization", `Bearer ${process.env.IG_TOKEN}`);
@@ -38,7 +38,7 @@ function publishReel(reelId){
     body: raw,
     redirect: "follow"
     };
-
-    return fetch(`https://graph.instagram.com/v25.0/${IG_USER_ID}/media_publish`, requestOptions)
-    .then((response) => response.json())
+    
+    const response = await fetch(`https://graph.instagram.com/v25.0/${IG_USER_ID}/media_publish`, requestOptions)
+    return await response.json()
 }
