@@ -1,33 +1,17 @@
-import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
-  ListObjectsV2Command,
-} from "@aws-sdk/client-s3";
-import { loadEnvFile } from "node:process";
+import { uploadFile, getPresignedUrl } from "./cloudflare_r2_s3.js"
+import { uploadReel, pollAndPublishContainer } from "./ig_api.js"
+import path from "node:path";
+import process from "node:process";
+import { readFile } from "node:fs/promises";
 
-loadEnvFile()
-const bucketName = "first-bucket";
 
-const s3 = new S3Client({
-  region: "auto", // Required by AWS SDK, not used by R2
-  // Provide your R2 endpoint: https://<ACCOUNT_ID>.r2.cloudflarestorage.com
-  endpoint: process.env.ENDPOINT,
-  credentials: {
-    // Provide your R2 Access Key ID and Secret Access Key
-    accessKeyId: process.env.S3_ID,
-    secretAccessKey: process.env.S3_SECRET,
-  },
-});
+const video_path = path.join(process.cwd(), "video.mp4")
 
-async function uploadFile(filename){
-    await s3.send(
-      new PutObjectCommand({
-        Bucket: bucketName,
-        Key: "beebop.txt",
-        Body: "Hello, R2!",
-      }),
-    );
-    // Upload a file
-    console.log("Uploaded myfile.txt");
-}
+const videoContent = await readFile(video_path)
+const video_metadata = JSON.parse(await readFile(path.join(process.cwd(), "video_metadata.json"), "utf-8"))
+const full_caption = video_metadata.caption + "\n\n" + video_metadata.hashtags.reduce((prev, curr) => prev + " " + curr)
+const key = path.basename(video_path)
+await uploadFile(videoContent, key)
+const url = await getPresignedUrl(key)
+const { id } = await uploadReel(url, full_caption, video_metadata.audio_name)
+await pollAndPublishContainer(id)
