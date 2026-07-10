@@ -2,9 +2,10 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
-  ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { loadEnvFile } from "node:process";
+import process from "node:process";
 
 loadEnvFile()
 const bucketName = "first-bucket";
@@ -20,22 +21,25 @@ const s3 = new S3Client({
   },
 });
 
-async function uploadFile(filename){
-    await s3.send(
-      new PutObjectCommand({
-        Bucket: bucketName,
-        Key: filename,
-        Body: "Hello, R2!",
-      }),
-    );
-    // Upload a file
-    console.log(`Uploaded ${filename}`);
+export async function uploadFile(fileContent, key) {
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+      Body: fileContent,
+      ContentType: "video/mp4"
+    }),
+  );
+  // Upload a file
+  console.log(`Uploaded ${key}`);
 }
 
-async function getPresignedUrl(filename){
-    const getUrl = await getSignedUrl(
-  S3,
-  new GetObjectCommand({ Bucket: bucketName, Key: filename}),
-  { expiresIn: 3600 }, // Valid for 1 hour
-);
+export async function getPresignedUrl(key) {
+  const getUrl = await getSignedUrl(
+    s3,
+    new GetObjectCommand({ Bucket: bucketName, Key: key }),
+    { expiresIn: 3600 }, // Valid for 1 hour
+  );
+  console.log(`here is the url: ${getUrl}`)
+  return getUrl
 }
