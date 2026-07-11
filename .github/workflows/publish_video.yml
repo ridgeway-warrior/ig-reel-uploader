@@ -1,0 +1,21 @@
+name: publish video to instagram
+on: workflow_call
+
+jobs:
+    publish_video:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: "actions/checkout@main"
+            - uses: "actions/setup-node@main"
+            - uses: "pnpm/action-setup@master"
+            - run: "pnpm ci"
+            - uses: "actions/download-artifact@main"
+              with:
+                name: remotion-video
+            - run: node index.js
+              env:
+                S3_ID: ${{secrets.S3_ID}}
+                S3_SECRET: ${{secrets.S3_SECRET}}
+                ENDPOINT: ${{secrets.ENDPOINT}}
+                IG_TOKEN: ${{secrets.IG_TOKEN}}
+                IG_USER_ID: ${{secrets.IG_USER_ID}}
