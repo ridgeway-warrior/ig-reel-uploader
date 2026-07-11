@@ -8,6 +8,8 @@ jobs:
             - uses: "actions/checkout@main"
             - uses: "actions/setup-node@main"
             - uses: "pnpm/action-setup@master"
+              with:
+                version: 11
             - run: "pnpm ci"
             - uses: "actions/download-artifact@main"
               with:
