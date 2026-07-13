@@ -11,7 +11,7 @@ jobs:
             - uses: "actions/setup-node@main"
             - uses: "pnpm/action-setup@master"
               with:
-                version: 11
+                version: 11.7
             - run: "pnpm ci"
             - uses: "actions/download-artifact@main"
               with:
